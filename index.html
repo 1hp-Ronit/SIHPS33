@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PedKhata Open Market (BAP)</title>
+    
+    <!-- Google Fonts for the bold, graphic look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Space Grotesk"', 'sans-serif'],
+                        display: ['"Archivo Black"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            pink: '#fbbdb4',
+                            green: '#9cb164',
+                            cream: '#fdf1ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React & Modern Babel for logic -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- UPDATED BABEL SCRIPT HERE -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            animation: marquee 15s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-brand-pink min-h-screen p-4 md:p-8">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function BuyerApp() {
+            const [items, setItems] = React.useState([]);
+            const [loading, setLoading] = React.useState(true);
+            const [quantities, setQuantities] = React.useState({});
+            const [cartCount, setCartCount] = React.useState(0);
+
+            React.useEffect(() => {
+                fetch('https://rocklike-handiwork-lived.ngrok-free.dev/catalog', {
+                    headers : {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.provider && data.provider.items) {
+                        setItems(data.provider.items);
+                    }
+                    setLoading(false);
+                })
+                .catch(err => {
+                    console.error("Error fetching catalog:", err);
+                    setLoading(false);
+                });
+            }, []);
+
+            const getLocation = (tags) => {
+                if (!tags) return "Local Farm";
+                const contactTag = tags.find(t => t.code === "farmer_contact");
+                if (!contactTag) return "Local Farm";
+                const loc = contactTag.list.find(l => l.code === "location");
+                return loc ? loc.value : "Local Farm";
+            };
+
+            const getPhone = (tags) => {
+                if (!tags) return "Hidden";
+                const contactTag = tags.find(t => t.code === "farmer_contact");
+                if (!contactTag) return "Hidden";
+                const phone = contactTag.list.find(l => l.code === "phone");
+                return phone ? phone.value : "Hidden";
+            };
+
+            // NEW: Helper to extract AI Quality Grade
+            const getQualityGrade = (tags) => {
+                if (!tags) return null;
+                const qualityTag = tags.find(t => t.code === "quality_assessment");
+                if (!qualityTag) return null;
+                const grade = qualityTag.list.find(l => l.code === "grade");
+                return grade ? grade.value : null;
+            };
+
+            const handleQtyChange = (itemId, delta, maxStock) => {
+                setQuantities(prev => {
+                    const currentQty = prev[itemId] || 1;
+                    const newQty = currentQty + delta;
+                    
+                    if (newQty >= 1 && newQty <= maxStock) {
+                        return { ...prev, [itemId]: newQty };
+                    }
+                    return prev;
+                });
+            };
+
+            const handleBuy = (item, selectedQty, totalPrice) => {
+                setCartCount(prev => prev + 1);
+                alert(`🛒 Added to Cart!\n\nItem: ${item.descriptor.name}\nQuantity: ${selectedQty} ${item.quantity.unitized.measure.unit}\nTotal Price: ₹${totalPrice}\n\nProvider: ${getPhone(item.tags)}`);
+            };
+
+            const handleNavClick = (section) => {
+                alert(`Navigating to the ${section} page... (Mock Route)`);
+            };
+
+            return (
+                <div className="max-w-[1400px] mx-auto border-[4px] md:border-[6px] border-black rounded-[2rem] md:rounded-[3rem] overflow-hidden flex flex-col shadow-2xl relative bg-brand-green">
+                    
+                    <div className="p-4 md:p-8 pb-0">
+                        <nav className="bg-brand-cream border-[3px] border-black rounded-full px-6 py-3 flex justify-between items-center text-sm font-bold uppercase tracking-widest">
+                            <span className="italic text-xl lowercase tracking-normal">pedkhata</span>
+                            <div className="hidden md:flex gap-12">
+                                <span onClick={() => handleNavClick('Shop')} className="cursor-pointer hover:underline decoration-2 underline-offset-4">Shop</span>
+                                <span onClick={() => handleNavClick('Farmers Network')} className="cursor-pointer hover:underline decoration-2 underline-offset-4">Our Farmers</span>
+                                <span onClick={() => handleNavClick('Contact')} className="cursor-pointer hover:underline decoration-2 underline-offset-4">Contact Us</span>
+                            </div>
+                            <button onClick={() => handleNavClick('Checkout')} className="text-xl cursor-pointer hover:scale-110 transition-transform relative">
+                                🛒
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border border-black">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div className="p-8 md:p-16 flex flex-col lg:flex-row gap-12 items-center relative">
+                        <div className="absolute top-10 left-10 md:left-20 text-5xl md:text-7xl text-[#f4a259] opacity-80 rotate-12">✺</div>
+
+                        <div className="flex-1 z-10 pt-8 md:pt-0">
+                            <h1 className="font-display text-5xl md:text-7xl lg:text-[5.5rem] uppercase leading-[0.9] text-black mb-6">
+                                Discover<br/>Fresh<br/>Harvests
+                            </h1>
+                            <p className="text-lg md:text-xl mb-8 max-w-md font-medium text-black">
+                                Direct from farmers to your kitchen. High quality, fresh, and local produce at open network prices.
+                            </p>
+                            <button onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })} className="bg-black text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:scale-105 transition-transform duration-300">
+                                Shop All Produce
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 w-full">
+                            <div className="bg-brand-pink border-[4px] border-black rounded-[2rem] aspect-[4/3] w-full flex items-center justify-center overflow-hidden relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                                <span className="text-9xl relative z-10 hover:scale-110 transition-transform duration-500 cursor-default">🚜</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-y-[4px] border-black py-2 overflow-hidden flex whitespace-nowrap items-center font-bold text-xs uppercase tracking-widest relative z-20">
+                        <div className="animate-marquee inline-block">
+                            <span className="px-4 text-black">FRESH 🍒 LOCAL 🍒 ORGANIC 🍒 DIRECT 🍒</span>
+                            <span className="px-4 text-black">FRESH 🍒 LOCAL 🍒 ORGANIC 🍒 DIRECT 🍒</span>
+                            <span className="px-4 text-black">FRESH 🍒 LOCAL 🍒 ORGANIC 🍒 DIRECT 🍒</span>
+                            <span className="px-4 text-black">FRESH 🍒 LOCAL 🍒 ORGANIC 🍒 DIRECT 🍒</span>
+                            <span className="px-4 text-black">FRESH 🍒 LOCAL 🍒 ORGANIC 🍒 DIRECT 🍒</span>
+                            <span className="px-4 text-black">FRESH 🍒 LOCAL 🍒 ORGANIC 🍒 DIRECT 🍒</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-brand-cream p-8 md:p-16 flex-1 min-h-[600px] relative">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center h-full mt-20">
+                                <div className="text-6xl animate-spin mb-4">🔄</div>
+                                <div className="text-center text-black font-bold text-xl uppercase tracking-widest animate-pulse">Scanning the Network...</div>
+                            </div>
+                        ) : items.length === 0 ? (
+                            <div className="text-center text-black font-bold text-2xl mt-20 max-w-2xl mx-auto border-[3px] border-black border-dashed p-12 rounded-3xl">
+                                No active farmer listings found.<br/>
+                                <span className="text-sm font-normal mt-4 block">Send a WhatsApp message to populate the catalog!</span>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 max-w-7xl mx-auto">
+                                {items.map((item, index) => {
+                                    const selectedQty = quantities[item.id] || 1;
+                                    const maxStock = item.quantity && item.quantity.available ? item.quantity.available.count : 100;
+                                    const unit = item.quantity && item.quantity.unitized && item.quantity.unitized.measure ? item.quantity.unitized.measure.unit : 'unit';
+                                    const pricePerUnit = item.price && item.price.value ? parseFloat(item.price.value) : 0;
+                                    const totalPrice = (selectedQty * pricePerUnit).toFixed(2);
+                                    
+                                    const quality = getQualityGrade(item.tags);
+
+                                    return (
+                                        <div key={item.id} className="border-[3px] border-black rounded-3xl p-6 relative flex flex-col group hover:-translate-y-2 transition-transform duration-300">
+                                            
+                                            {index === 0 && (
+                                                <div className="absolute -top-6 -right-6 bg-brand-pink border-2 border-black rounded-full w-20 h-20 flex items-center justify-center text-center font-black text-sm uppercase leading-tight rotate-12 z-10">
+                                                    Top<br/>Pick
+                                                </div>
+                                            )}
+
+                                            <h2 className="font-display text-3xl md:text-4xl uppercase text-center mb-4 tracking-tight line-clamp-1 truncate" title={item.descriptor.name}>
+                                                {item.descriptor.name}
+                                            </h2>
+
+                                            <div className="flex flex-wrap justify-center gap-2 mb-4">
+                                                <span className="bg-white border-2 border-black rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+                                                    📍 {getLocation(item.tags)}
+                                                </span>
+                                                <span className="bg-brand-pink border-2 border-black rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+                                                    📞 {getPhone(item.tags)}
+                                                </span>
+                                            </div>
+
+                                            {quality && quality !== "Pending" && (
+                                                <div className="flex justify-center mb-4">
+                                                    <span className="bg-[#fdf1ca] text-green-800 border-2 border-black rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1">
+                                                        ✨ AI Verified: {quality}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* UPDATED: Dynamic Image Rendering */}
+                                            {item.descriptor.images && item.descriptor.images.length > 0 ? (
+                                                <div className="bg-white aspect-[4/4] rounded-[1.5rem] border-[3px] border-black mb-4 relative overflow-hidden">
+                                                    <img 
+                                                        src={item.descriptor.images[0]} 
+                                                        alt={item.descriptor.name}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
+                                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-1 rounded-sm text-xs font-bold tracking-widest z-20">
+                                                        pedkhata
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-brand-green aspect-[4/4] rounded-[1.5rem] border-[3px] border-black mb-4 flex items-center justify-center text-7xl shadow-inner relative overflow-hidden transition-colors">
+                                                    <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#e49c81] rounded-full mix-blend-multiply opacity-50 blur-xl"></div>
+                                                    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#f4a259] rounded-full mix-blend-multiply opacity-50 blur-xl"></div>
+                                                    
+                                                    <span className="relative z-10 drop-shadow-xl group-hover:scale-110 transition-transform duration-300">{item.descriptor.symbol || '📦'}</span>
+                                                    
+                                                    <div className="absolute bottom-4 bg-black text-white px-4 py-1 rounded-sm text-xs font-bold tracking-widest z-20">
+                                                        pedkhata
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <p className="text-center text-sm font-medium mb-2 text-gray-800 line-clamp-2 min-h-[40px]">
+                                                {item.descriptor.long_desc || item.descriptor.short_desc}
+                                            </p>
+
+                                            <div className="text-center text-xs font-bold uppercase tracking-widest mb-4 text-green-700">
+                                                Stock: {maxStock} {unit}s available
+                                            </div>
+
+                                            <div className="flex justify-between items-center border-[3px] border-black rounded-full px-4 py-2 mb-4 font-bold text-lg bg-white/50">
+                                                <button 
+                                                    onClick={() => handleQtyChange(item.id, -1, maxStock)} 
+                                                    className="w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white rounded-full transition-colors active:scale-95">
+                                                    −
+                                                </button>
+                                                <span className="font-sans min-w-[60px] text-center">{selectedQty} {unit}</span>
+                                                <button 
+                                                    onClick={() => handleQtyChange(item.id, 1, maxStock)} 
+                                                    className="w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white rounded-full transition-colors active:scale-95">
+                                                    +
+                                                </button>
+                                            </div>
+
+                                            <button 
+                                                onClick={() => handleBuy(item, selectedQty, totalPrice)} 
+                                                className="w-full bg-black text-white rounded-full py-4 font-bold uppercase tracking-widest text-sm hover:bg-gray-800 transition-colors mt-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-1 active:translate-x-1">
+                                                Add to Cart - ₹{totalPrice}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BuyerApp />);
+    </script>
+</body>
+</html>
