@@ -4,7 +4,7 @@ const path = require('path');
 const CATALOG_PATH = path.join(__dirname, 'catalog.json');
 
 /**
- * Adds or updates an item in the Beckn Provider Catalog
+ * Adds or updates an item in the Beckn Provider Catalog (Strict v2.0.0 Format)
  */
 function addOrUpdateProduce(farmerPhone, parsedData) {
     let catalog = { provider: { id: "pedkhata-farmer-provider-1", descriptor: { name: "PedKhata Direct Farmer Network" }, items: [] } };
@@ -24,46 +24,39 @@ function addOrUpdateProduce(farmerPhone, parsedData) {
         descriptor: {
             name: parsedData.item_name,
             code: parsedData.item_name.toLowerCase(),
-            symbol: "🌾",
-            short_desc: `Fresh ${parsedData.item_name} direct from farmer`,
-            long_desc: `Available quantity: ${parsedData.quantity || 'Bulk'} ${parsedData.unit || 'units'}. Location: ${parsedData.location || 'Local farm'}.`,
-            images: parsedData.image_data_uri ? [parsedData.image_data_uri] : []
-
+            shortDesc: `Fresh ${parsedData.item_name} direct from farmer`,
+            longDesc: `Available quantity: ${parsedData.quantity || 'Bulk'} ${parsedData.unit || 'units'}. Location: ${parsedData.location || 'Local farm'}.`
         },
         price: {
             currency: parsedData.currency || "INR",
             value: String(parsedData.price_per_unit)
         },
-        quantity: {
-            available: {
-                count: parsedData.quantity || 100
-            },
-            unitized: {
-                measure: {
-                    unit: parsedData.unit || "kg",
-                    value: "1"
-                }
-            }
-        },
         tags: [
             {
-                code: "farmer_contact",
+                descriptor: {
+                    code: "farmer_contact"
+                },
                 list: [
-                    { code: "phone", value: farmerPhone },
-                    { code: "location", value: parsedData.location || "Maharashtra" }
+                    { descriptor: { code: "phone" }, value: farmerPhone },
+                    { descriptor: { code: "location" }, value: parsedData.location || "Maharashtra" }
                 ]
             },
             {
-                // NEW: Adding the quality grading tags
-                code: "quality_assessment",
+                descriptor: {
+                    code: "quality_assessment"
+                },
                 list: [
-                    { code: "grade", value: parsedData.quality_grade || "Pending" },
-                    { code: "notes", value: parsedData.visual_notes || "No notes available." }
+                    { descriptor: { code: "grade" }, value: parsedData.quality_grade || "Pending" },
+                    { descriptor: { code: "notes" }, value: parsedData.visual_notes || "No notes available." }
                 ]
             }
-        ],
-        matched: true
+        ]
     };
+
+    // Ensure items array exists
+    if (!catalog.provider.items) {
+        catalog.provider.items = [];
+    }
 
     // Update if item already exists for this farmer, otherwise append
     const existingIndex = catalog.provider.items.findIndex(i => i.id === itemId);
@@ -79,7 +72,7 @@ function addOrUpdateProduce(farmerPhone, parsedData) {
 }
 
 /**
- * Returns the Beckn /on_search catalog payload
+ * Returns the Beckn catalog payload
  */
 function getBecknCatalog() {
     if (fs.existsSync(CATALOG_PATH)) {

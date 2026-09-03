@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const fs = require('fs');
+
 require('dotenv').config();
 
 // Consolidated local imports
@@ -13,6 +14,7 @@ const pendingListings = {};
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 const PORT = process.env.PORT || 8000;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
@@ -163,30 +165,28 @@ app.post('/beckn-webhook/discover', async (req, res) => {
         const catalogData = getBecknCatalog();
 
         // 2. Construct the strict Beckn v2.0.0 on_discover payload
-        // 2. Construct the strict Beckn v2.0.0 on_discover payload
-    const onDiscoverPayload = {
-        context: {
-            ...req.body.context,
-            action: 'on_discover',
-            timestamp: new Date().toISOString()
-        },
-        message: {
-            catalogs: [
-                {
-                    "id": "pedkhata-live-catalog",
-                    "descriptor": {
-                        "name": "PedKhata WhatsApp Market"
-                    },
-                    // 1. "provider" is now a singular object, NOT an array!
-                    "provider": {
-                        "id": catalogData.provider.id,
-                        "descriptor": catalogData.provider.descriptor
-                    },
-                    "offers": catalogData.provider.items
-                }
-            ]
-        }
-    };
+        const onDiscoverPayload = {
+            context: {
+                ...req.body.context,
+                action: 'on_discover',
+                timestamp: new Date().toISOString()
+            },
+            message: {
+                catalogs: [
+                    {
+                        "id": "pedkhata-live-catalog",
+                        "descriptor": {
+                            "name": "PedKhata WhatsApp Market"
+                        },
+                        "provider": {
+                            "id": catalogData.provider.id,
+                            "descriptor": catalogData.provider.descriptor
+                        },
+                        "offers": catalogData.provider.items
+                    }
+                ]
+            }
+        };
 
         // 3. Send the async callback to your Provider Adapter
         const response = await axios.post('http://localhost:8082/bpp/caller/on_discover', onDiscoverPayload, {
@@ -199,20 +199,100 @@ app.post('/beckn-webhook/discover', async (req, res) => {
 
     } catch (error) {
         console.error("❌ Error processing discover:");
-        // This line expands the nested schema errors so you can read exactly what failed!
         console.error(error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
     }
 });
 
-// 4. Beckn Protocol Webhook for Select
-app.post('/beckn-webhook/select', (req, res) => {
+// 4. Beckn Protocol Webhook for Select (Generating the Quote)
+app.post('/beckn-webhook/select', async (req, res) => {
     res.status(200).send({
         message: {
             ack: { status: "ACK" }
         }
     });
-    console.log("\n✅ SUCCESS! Received select payload from Beckn network:");
-    console.log(JSON.stringify(req.body, null, 2));
+
+    console.log("\n🛒 Received select request. Generating quote...");
+
+    try {
+        const onSelectPayload = {
+            context: {
+                ...req.body.context,
+                action: 'on_select',
+                timestamp: new Date().toISOString()
+            },
+            message: req.body.message
+        };
+
+        const response = await axios.post('http://localhost:8082/bpp/caller/on_select', onSelectPayload, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.status === 200) {
+            console.log("✅ Successfully sent on_select quote back to the network!");
+        }
+    } catch (error) {
+        console.error("❌ Error processing select:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    }
+});
+
+// 5. Beckn Protocol Webhook for Init (Checkout / Fulfillment)
+app.post('/beckn-webhook/init', async (req, res) => {
+    res.status(200).send({
+        message: { ack: { status: "ACK" } }
+    });
+
+    console.log("\n📦 Received init (checkout) request. Processing fulfillment...");
+
+    try {
+        const onInitPayload = {
+            context: {
+                ...req.body.context,
+                action: 'on_init',
+                timestamp: new Date().toISOString()
+            },
+            message: req.body.message
+        };
+
+        const response = await axios.post('http://localhost:8082/bpp/caller/on_init', onInitPayload, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.status === 200) {
+            console.log("✅ Successfully sent on_init response!");
+        }
+    } catch (error) {
+        console.error("❌ Error processing init:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    }
+});
+
+// 6. Beckn Protocol Webhook for Confirm (Order Placement)
+app.post('/beckn-webhook/confirm', async (req, res) => {
+    res.status(200).send({
+        message: { ack: { status: "ACK" } }
+    });
+
+    console.log("\n🎉 Received confirm request! Finalizing order...");
+
+    try {
+        const onConfirmPayload = {
+            context: {
+                ...req.body.context,
+                action: 'on_confirm',
+                timestamp: new Date().toISOString()
+            },
+            message: req.body.message
+        };
+
+        const response = await axios.post('http://localhost:8082/bpp/caller/on_confirm', onConfirmPayload, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.status === 200) {
+            console.log("✅ Successfully confirmed order on the network!");
+        }
+    } catch (error) {
+        console.error("❌ Error processing confirm:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    }
 });
 
 // Catalog view for quick debugging and our Buyer App Webpage
@@ -223,3 +303,4 @@ app.get('/catalog', (req, res) => {
 app.listen(PORT, '0.0.0.0',() => {
     console.log(`🚀 Farmer Webhook & BPP Server listening on port ${PORT}`);
 });
+

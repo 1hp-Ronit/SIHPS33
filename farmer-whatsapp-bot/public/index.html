@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PedKhata | Fresh Direct from Farmer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#2C3531] min-h-screen flex flex-col">
+
+    <!-- Top Utility Bar -->
+    <div class="bg-[#2D5A27] text-white text-xs py-2 px-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span>📍 Direct Farmer Network &bull; Nagpur, Pune & Maharashtra</span>
+            <div class="flex items-center space-x-4">
+                <span>📞 Support: +91 70700 02780</span>
+                <span>🌾 Live WhatsApp Integration Active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="bg-white border-b border-[#E3E8E3] sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🌾</span>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-[#1E3F20] leading-tight">PedKhata</h1>
+                    <span class="text-[10px] uppercase font-semibold text-emerald-700 tracking-wider">Open Network BPP</span>
+                </div>
+            </div>
+            
+            <div class="flex-grow max-w-xl mx-12 hidden md:block">
+                <div class="relative">
+                    <input type="text" placeholder="Search fresh tomatoes, mangoes, wheat..." class="w-full bg-[#F4F6F4] border border-[#DCDEDC] rounded-full py-2.5 pl-5 pr-12 text-sm focus:outline-none focus:border-emerald-600">
+                    <button class="absolute right-3 top-2.5 text-emerald-700">🔍</button>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button onclick="loadCatalog()" class="bg-[#2D5A27] text-white text-xs font-semibold px-4 py-2.5 rounded-full hover:bg-[#23481F] transition shadow-sm">
+                    🔄 Refresh Feed
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner Section -->
+    <section class="max-w-7xl mx-auto px-6 py-8 w-full">
+        <div class="bg-gradient-to-r from-[#EAF2EC] to-[#F4F8F4] rounded-3xl p-8 md:p-12 border border-[#D5E2D6] flex flex-col md:flex-row justify-between items-center relative overflow-hidden shadow-sm">
+            <div class="max-w-xl z-10">
+                <span class="bg-emerald-200 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">AI Graded Produce</span>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-[#1E3F20] mt-3 mb-4 leading-tight">Fresh Groceries, Direct from Farms.</h2>
+                <p class="text-[#55605B] text-sm md:text-base leading-relaxed mb-6">
+                    Farmers send crop listings and voice notes via WhatsApp. Our AI inspects quality and broadcasts straight to the Beckn open network in real-time.
+                </p>
+                <div class="flex items-center space-x-4">
+                    <span class="bg-white px-4 py-2 rounded-xl border border-emerald-200 text-xs font-bold text-emerald-800 shadow-sm">
+                        📦 Active Listings: <span id="total-items">0</span>
+                    </span>
+                </div>
+            </div>
+            <div class="mt-8 md:mt-0 text-7xl md:text-9xl z-10 select-none animate-pulse">
+                🍅🌾🥔
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <main class="max-w-7xl mx-auto px-6 py-6 flex-grow w-full">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-[#1E3F20]">Live Farmer Feed (WhatsApp + AI)</h3>
+            <span class="text-xs text-[#8A9590]">Auto-syncing every 5 seconds</span>
+        </div>
+
+        <!-- Catalog Grid -->
+        <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dynamic cards inject here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-white rounded-3xl border border-dashed border-[#D2CDC4] mt-4">
+            <span class="text-4xl mb-3 block">🌿</span>
+            <p class="text-[#55605B] font-medium">No active crop listings found in catalog.</p>
+            <p class="text-xs text-[#8A9590] mt-1">Send a message or voice note to your WhatsApp bot to publish items instantly.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1E3F20] text-white py-10 mt-16">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-emerald-200/80">
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <span class="text-xl">🌾</span>
+                <span class="font-bold text-white text-base">PedKhata Open Network</span>
+            </div>
+            <div>
+                Powered by Beckn Protocol v2.0.0 &bull; Meta WhatsApp Business API &bull; AI Quality Assured
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script to Load Data -->
+    <script>
+        async function loadCatalog() {
+            try {
+                const response = await fetch('/catalog');
+                const data = await response.json();
+                
+                const grid = document.getElementById('catalog-grid');
+                const emptyState = document.getElementById('empty-state');
+                const totalCountEl = document.getElementById('total-items');
+                
+                grid.innerHTML = '';
+                
+                const items = data.provider?.items || [];
+                totalCountEl.innerText = items.length;
+
+                if (items.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+
+                items.forEach(item => {
+                    const tags = item.tags || [];
+                    const contactTag = tags.find(t => t.descriptor?.code === 'farmer_contact')?.list || [];
+                    const qualityTag = tags.find(t => t.descriptor?.code === 'quality_assessment')?.list || [];
+                    
+                    const location = contactTag.find(l => l.descriptor?.code === 'location')?.value || 'Local Farm';
+                    const grade = qualityTag.find(l => l.descriptor?.code === 'grade')?.value || 'Standard';
+                    const notes = qualityTag.find(l => l.descriptor?.code === 'notes')?.value || '';
+
+                    const card = `
+                        <div class="bg-white rounded-2xl p-5 border border-[#E3E8E3] shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                                        ✨ ${grade}
+                                    </span>
+                                    <span class="text-xs text-[#6B7C75] font-medium">📍 ${location}</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-[#1E3F20] mb-1">${item.descriptor.name}</h4>
+                                <p class="text-xs text-[#6B7C75] mb-3 leading-relaxed">${item.descriptor.shortDesc || item.descriptor.longDesc}</p>
+                                
+                                ${notes ? `<div class="bg-[#F8F9FA] p-2.5 rounded-xl text-[11px] text-[#55605B] mb-4 border border-[#E3E8E3]">
+                                    <strong class="text-[#1E3F20]">AI Inspector:</strong> ${notes}
+                                </div>` : ''}
+                            </div>
+                            
+                            <div class="pt-4 border-t border-[#F0EDEB] flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] uppercase font-bold text-[#8A9590] block">Price</span>
+                                    <span class="text-lg font-extrabold text-[#1E3F20]">₹${item.price.value} <span class="text-xs font-normal text-[#6B7C75]">/ unit</span></span>
+                                </div>
+                                <button onclick="alert('Item selected from Beckn BPP catalog feed.')" class="bg-[#2D5A27] text-white text-xs font-semibold px-3 py-2 rounded-xl hover:bg-[#23481F] transition">
+                                    Select
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += card;
+                });
+
+            } catch (err) {
+                console.error('Failed to load live catalog:', err);
+            }
+        }
+
+        loadCatalog();
+        setInterval(loadCatalog, 5000);
+    </script>
+</body>
+</html>

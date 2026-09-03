@@ -24,11 +24,15 @@
             },
             "list": [
               {
-                "descriptor": { "code": "phone" },
+                "descriptor": {
+                  "code": "phone"
+                },
                 "value": "917070002780"
               },
               {
-                "descriptor": { "code": "location" },
+                "descriptor": {
+                  "code": "location"
+                },
                 "value": "AIT Pune"
               }
             ]
@@ -39,12 +43,69 @@
             },
             "list": [
               {
-                "descriptor": { "code": "grade" },
+                "descriptor": {
+                  "code": "grade"
+                },
                 "value": "Grade A (Premium)"
               },
               {
-                "descriptor": { "code": "notes" },
+                "descriptor": {
+                  "code": "notes"
+                },
                 "value": "Bright golden yellow mangoes with smooth skin."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ITEM_WHEAT_2780",
+        "descriptor": {
+          "name": "Wheat",
+          "code": "wheat",
+          "shortDesc": "Fresh Wheat direct from farmer",
+          "longDesc": "Available quantity: 100 kg. Location: pune."
+        },
+        "price": {
+          "currency": "INR",
+          "value": "30"
+        },
+        "tags": [
+          {
+            "descriptor": {
+              "code": "farmer_contact"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "phone"
+                },
+                "value": "917070002780"
+              },
+              {
+                "descriptor": {
+                  "code": "location"
+                },
+                "value": "pune"
+              }
+            ]
+          },
+          {
+            "descriptor": {
+              "code": "quality_assessment"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "grade"
+                },
+                "value": "Unverified"
+              },
+              {
+                "descriptor": {
+                  "code": "notes"
+                },
+                "value": "Could not analyze image."
               }
             ]
           }
