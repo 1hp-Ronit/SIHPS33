@@ -1,10 +1,10 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const fs = require('fs');
 require('dotenv').config();
 
 // Consolidated local imports
-
 const { addOrUpdateProduce, getBecknCatalog } = require('./becknCatalog');
 const { parseFarmerMessage, parseFarmerAudio, gradeCropImage } = require('./aiParser');
 
@@ -18,7 +18,6 @@ const PORT = process.env.PORT || 8000;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
-
 
 // WhatsApp Message Sender
 async function sendWhatsAppMessage(to, messageText) {
@@ -57,13 +56,10 @@ app.get('/webhook', (req, res) => {
 });
 
 // 2. WhatsApp Inbound Messages Endpoint
-// 2. WhatsApp Inbound Messages Endpoint
 app.post('/webhook', async (req, res) => {
     const body = req.body;
 
     if (body.object === 'whatsapp_business_account') {
-        
-        // ✅ ABSOLUTE TOP: Tell Meta "We got it!" immediately to stop duplicate webhooks
         res.sendStatus(200);
 
         const changes = body.entry?.[0]?.changes?.[0]?.value;
@@ -82,7 +78,7 @@ app.post('/webhook', async (req, res) => {
                     if (greetings.includes(lowerText)) {
                         const welcomeMsg = `🌾 *Welcome to PedKhata Open Market!* 🚜\n\nTo list your crops, just send a text or 🎙️ *voice note* with:\n📦 *Crop Name*\n⚖️ *Quantity*\n💰 *Price*\n📍 *Location*`;
                         await sendWhatsAppMessage(from, welcomeMsg);
-                        return; // Done
+                        return;
                     }
 
                     console.log(`\n📩 Farmer [${from}] Text: "${text}"`);
@@ -111,16 +107,11 @@ app.post('/webhook', async (req, res) => {
                     console.error('❌ Audio Error:', error.message);
                 }
             } else if (type === 'image') {
-                
-                // ✅ SAFETY CHECK: If memory is empty (or cleared by a duplicate thread), ignore this!
                 if (!pendingListings[from]) {
-                    // Only warn if this isn't a duplicate webhook spam
                     console.log(`⚠️ Ignored image from [${from}] - no pending listing found in memory.`);
                     return; 
                 }
 
-                // Lock the memory by pulling the data out and deleting it immediately
-                // This guarantees a duplicate webhook thread can't process the same image!
                 const pendingData = { ...pendingListings[from] };
                 delete pendingListings[from];
 
@@ -152,44 +143,76 @@ app.post('/webhook', async (req, res) => {
                 }
             }
         }
-  
     } else {
         res.sendStatus(404);
     }
 });
 
-// 3. Beckn Protocol /search endpoint (For Buyer Apps / Gateway querying the catalog)
-app.post('/search', (req, res) => {
-    console.log('🔍 Received Beckn /search request from Network');
-    const catalogData = getBecknCatalog();
+// 3. Beckn Protocol Webhook for Discovery
+app.post('/beckn-webhook/discover', async (req, res) => {
+    // 1. Instantly acknowledge the request to prevent timeouts
+    res.status(200).send({
+        message: {
+            ack: { status: "ACK" }
+        }
+    });
 
-    // Construct standard Beckn on_search response payload
-    const responsePayload = {
+    console.log("\n🔍 Received discover request. Loading dynamic WhatsApp catalog...");
+
+    try {
+        const catalogData = getBecknCatalog();
+
+        // 2. Construct the strict Beckn v2.0.0 on_discover payload
+        // 2. Construct the strict Beckn v2.0.0 on_discover payload
+    const onDiscoverPayload = {
         context: {
-            domain: "nic2004:52110",
-            action: "on_search",
-            version: "1.1.0",
-            bpp_id: "pedkhata-bpp-node.ngrok-free.dev",
-            bpp_uri: "https://pedkhata-bpp-node.ngrok-free.dev",
+            ...req.body.context,
+            action: 'on_discover',
             timestamp: new Date().toISOString()
         },
         message: {
-            catalog: {
-                "bpp/descriptor": {
-                    name: "PedKhata Farmer BPP"
-                },
-                "bpp/providers": [
-                    {
-                        id: catalogData.provider.id,
-                        descriptor: catalogData.provider.descriptor,
-                        items: catalogData.provider.items
-                    }
-                ]
-            }
+            catalogs: [
+                {
+                    "id": "pedkhata-live-catalog",
+                    "descriptor": {
+                        "name": "PedKhata WhatsApp Market"
+                    },
+                    // 1. "provider" is now a singular object, NOT an array!
+                    "provider": {
+                        "id": catalogData.provider.id,
+                        "descriptor": catalogData.provider.descriptor
+                    },
+                    "offers": catalogData.provider.items
+                }
+            ]
         }
     };
 
-    res.status(200).json(responsePayload);
+        // 3. Send the async callback to your Provider Adapter
+        const response = await axios.post('http://localhost:8082/bpp/caller/on_discover', onDiscoverPayload, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.status === 200) {
+            console.log("✅ Successfully broadcasted WhatsApp catalog to the network!");
+        }
+
+    } catch (error) {
+        console.error("❌ Error processing discover:");
+        // This line expands the nested schema errors so you can read exactly what failed!
+        console.error(error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    }
+});
+
+// 4. Beckn Protocol Webhook for Select
+app.post('/beckn-webhook/select', (req, res) => {
+    res.status(200).send({
+        message: {
+            ack: { status: "ACK" }
+        }
+    });
+    console.log("\n✅ SUCCESS! Received select payload from Beckn network:");
+    console.log(JSON.stringify(req.body, null, 2));
 });
 
 // Catalog view for quick debugging and our Buyer App Webpage
@@ -197,6 +220,6 @@ app.get('/catalog', (req, res) => {
     res.json(getBecknCatalog());
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0',() => {
     console.log(`🚀 Farmer Webhook & BPP Server listening on port ${PORT}`);
 });

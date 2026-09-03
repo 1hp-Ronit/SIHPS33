@@ -47,3 +47,22 @@ temp/
 *.ogg
 *.mp3
 *.mp4
+
+# Node Dependencies
+node_modules/
+package-lock.json
+
+# Environment Variables (CRITICAL: Never push these!)
+.env
+.env.local
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+docker.log
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
