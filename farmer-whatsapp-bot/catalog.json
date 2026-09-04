@@ -110,6 +110,112 @@
             ]
           }
         ]
+      },
+      {
+        "id": "ITEM_TOMATO_2780",
+        "descriptor": {
+          "name": "Tomato",
+          "code": "tomato",
+          "shortDesc": "Fresh Tomato direct from farmer",
+          "longDesc": "Available quantity: 500 kg. Location: Nagpur."
+        },
+        "price": {
+          "currency": "INR",
+          "value": "15"
+        },
+        "tags": [
+          {
+            "descriptor": {
+              "code": "farmer_contact"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "phone"
+                },
+                "value": "917070002780"
+              },
+              {
+                "descriptor": {
+                  "code": "location"
+                },
+                "value": "Nagpur"
+              }
+            ]
+          },
+          {
+            "descriptor": {
+              "code": "quality_assessment"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "grade"
+                },
+                "value": "Unverified"
+              },
+              {
+                "descriptor": {
+                  "code": "notes"
+                },
+                "value": "Could not analyze image."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ITEM_POTATO_2780",
+        "descriptor": {
+          "name": "Potato",
+          "code": "potato",
+          "shortDesc": "Fresh Potato direct from farmer",
+          "longDesc": "Available quantity: 100 kg. Location: Patna, Bihar."
+        },
+        "price": {
+          "currency": "INR",
+          "value": "10"
+        },
+        "tags": [
+          {
+            "descriptor": {
+              "code": "farmer_contact"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "phone"
+                },
+                "value": "917070002780"
+              },
+              {
+                "descriptor": {
+                  "code": "location"
+                },
+                "value": "Patna, Bihar"
+              }
+            ]
+          },
+          {
+            "descriptor": {
+              "code": "quality_assessment"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "grade"
+                },
+                "value": "Grade B (Standard)"
+              },
+              {
+                "descriptor": {
+                  "code": "notes"
+                },
+                "value": "Unwashed potatoes with variable sizing, clinging soil residue, and minor surface blemishes."
+              }
+            ]
+          }
+        ]
       }
     ]
   }
