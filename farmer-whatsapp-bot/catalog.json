@@ -216,6 +216,165 @@
             ]
           }
         ]
+      },
+      {
+        "id": "ITEM_PARWAL_2780",
+        "descriptor": {
+          "name": "Parwal",
+          "code": "parwal",
+          "shortDesc": "Fresh Parwal direct from farmer",
+          "longDesc": "Available quantity: 50 kg. Location: Meerut, UP."
+        },
+        "price": {
+          "currency": "INR",
+          "value": "10"
+        },
+        "tags": [
+          {
+            "descriptor": {
+              "code": "farmer_contact"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "phone"
+                },
+                "value": "917070002780"
+              },
+              {
+                "descriptor": {
+                  "code": "location"
+                },
+                "value": "Meerut, UP"
+              }
+            ]
+          },
+          {
+            "descriptor": {
+              "code": "quality_assessment"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "grade"
+                },
+                "value": "Grade A (Premium)"
+              },
+              {
+                "descriptor": {
+                  "code": "notes"
+                },
+                "value": "Fresh, firm pointed gourds with vibrant green color, characteristic pale stripes, and no visible blemishes or discoloration."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ITEM_WHEAT_0919",
+        "descriptor": {
+          "name": "Wheat",
+          "code": "wheat",
+          "shortDesc": "Fresh Wheat direct from farmer",
+          "longDesc": "Available quantity: 200 kg. Location: Sonipat, Haryana."
+        },
+        "price": {
+          "currency": "INR",
+          "value": "25"
+        },
+        "tags": [
+          {
+            "descriptor": {
+              "code": "farmer_contact"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "phone"
+                },
+                "value": "917456980919"
+              },
+              {
+                "descriptor": {
+                  "code": "location"
+                },
+                "value": "Sonipat, Haryana"
+              }
+            ]
+          },
+          {
+            "descriptor": {
+              "code": "quality_assessment"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "grade"
+                },
+                "value": "Grade A (Premium)"
+              },
+              {
+                "descriptor": {
+                  "code": "notes"
+                },
+                "value": "Clean, plump golden wheat grains with uniform size and no visible damage or foreign material."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ITEM_BHINDI_2780",
+        "descriptor": {
+          "name": "Bhindi",
+          "code": "bhindi",
+          "shortDesc": "Fresh Bhindi direct from farmer",
+          "longDesc": "Available quantity: 52 kg. Location: Karnataka."
+        },
+        "price": {
+          "currency": "INR",
+          "value": "10"
+        },
+        "tags": [
+          {
+            "descriptor": {
+              "code": "farmer_contact"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "phone"
+                },
+                "value": "917070002780"
+              },
+              {
+                "descriptor": {
+                  "code": "location"
+                },
+                "value": "Karnataka"
+              }
+            ]
+          },
+          {
+            "descriptor": {
+              "code": "quality_assessment"
+            },
+            "list": [
+              {
+                "descriptor": {
+                  "code": "grade"
+                },
+                "value": "Grade A (Premium)"
+              },
+              {
+                "descriptor": {
+                  "code": "notes"
+                },
+                "value": "Vibrant green, crisp, and fresh okra pods with smooth skin and no visible blemishes or discoloration."
+              }
+            ]
+          }
+        ]
       }
     ]
   }

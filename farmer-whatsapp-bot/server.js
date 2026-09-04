@@ -266,7 +266,9 @@ app.post('/beckn-webhook/init', async (req, res) => {
 });
 
 // 6. Beckn Protocol Webhook for Confirm (Order Placement)
+// 6. Beckn Protocol Webhook for Confirm (Order Placement)
 app.post('/beckn-webhook/confirm', async (req, res) => {
+    // 1. Instantly ACK the request
     res.status(200).send({
         message: { ack: { status: "ACK" } }
     });
@@ -274,6 +276,16 @@ app.post('/beckn-webhook/confirm', async (req, res) => {
     console.log("\n🎉 Received confirm request! Finalizing order...");
 
     try {
+        const contract = req.body.message.contract;
+        
+        // 2. Extract details from the v2.0.0 strict contract payload
+        const itemName = contract.commitments[0]?.descriptor?.name || "Produce";
+        const totalAmount = contract.consideration[0]?.price?.value || "0";
+        
+        const buyerParticipant = contract.participants.find(p => p.descriptor.code === 'buyer');
+        const buyerName = buyerParticipant?.descriptor?.name || "A verified buyer";
+
+        // 3. Prepare the outbound Beckn callback
         const onConfirmPayload = {
             context: {
                 ...req.body.context,
@@ -283,18 +295,43 @@ app.post('/beckn-webhook/confirm', async (req, res) => {
             message: req.body.message
         };
 
+        // 4. Send the callback to the ONIX network adapter
         const response = await axios.post('http://localhost:8082/bpp/caller/on_confirm', onConfirmPayload, {
             headers: { 'Content-Type': 'application/json' }
         });
 
         if (response.status === 200) {
             console.log("✅ Successfully confirmed order on the network!");
+            
+            // 5. 🚀 THE NEW FEATURE: Notify the Farmer via WhatsApp!
+            const catalogData = getBecknCatalog();
+            const item = catalogData.provider.items.find(i => i.descriptor.name === itemName);
+            
+            let farmerPhone = null;
+            if (item) {
+                // Dig into the tags array to find the farmer's phone number we saved earlier
+                const contactTag = item.tags.find(t => t.descriptor.code === 'farmer_contact');
+                const phoneObj = contactTag?.list.find(l => l.descriptor.code === 'phone');
+                if (phoneObj) farmerPhone = phoneObj.value;
+            }
+
+            if (farmerPhone) {
+                const notifyMsg = `🎉 *Great news! Your crop has been sold on PedKhata!*\n\n` +
+                                  `🛒 *Buyer:* ${buyerName}\n` +
+                                  `🌾 *Item Sold:* ${itemName}\n` +
+                                  `💰 *Total Amount:* ₹${totalAmount}\n\n` +
+                                  `🚚 A delivery partner will arrive soon for pickup. Please keep the produce ready!`;
+                
+                await sendWhatsAppMessage(farmerPhone, notifyMsg);
+                console.log(`📲 WhatsApp confirmation successfully dispatched to farmer at ${farmerPhone}`);
+            } else {
+                console.log("⚠️ Order confirmed, but couldn't find farmer's phone number in catalog.");
+            }
         }
     } catch (error) {
         console.error("❌ Error processing confirm:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
     }
 });
-
 // Catalog view for quick debugging and our Buyer App Webpage
 app.get('/catalog', (req, res) => {
     res.json(getBecknCatalog());
