@@ -1,4 +1,4 @@
-# PedKhata | Decentralized Agricultural Marketplace
+# Decentralized Agricultural Marketplace
 
 ![Beckn Protocol](https://img.shields.io/badge/Beckn_Protocol-v2.0.0-emerald)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-success)
@@ -6,7 +6,7 @@
 ![Docker](https://img.shields.io/badge/Docker-ONIX_Adapters-blue)
 ![WhatsApp API](https://img.shields.io/badge/Meta-WhatsApp_Business_API-green)
 
-**PedKhata** is a decentralized, zero-friction agricultural commerce node built on the open **Beckn Protocol (v2.0.0)**. It enables non-technical farmers to list their produce directly onto an open network (like ONDC) using only WhatsApp text, voice notes, and images. 
+A decentralized, zero-friction agricultural commerce node built on the open **Beckn Protocol (v2.0.0)**. It enables non-technical farmers to list their produce directly onto an open network (like ONDC) using only WhatsApp text, voice notes, and images. 
 
 Multimodal AI (Gemini 1.5 Flash) handles parsing, translation, and computer vision-based quality grading, while enterprise-grade ONIX Docker containers handle cryptographic network security and strictly validated peer-to-peer transaction routing.
 
