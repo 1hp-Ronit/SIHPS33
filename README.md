@@ -1,4 +1,4 @@
-# Decentralized Agricultural Marketplace
+# Decentralized Agricultural Marketplace | SIH PS 33 : Ministry of Consumer Affairs, Food & Public Distribution
 
 ![Beckn Protocol](https://img.shields.io/badge/Beckn_Protocol-v2.0.0-emerald)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-success)
@@ -8,7 +8,7 @@
 
 A decentralized, zero-friction agricultural commerce node built on the open **Beckn Protocol (v2.0.0)**. It enables non-technical farmers to list their produce directly onto an open network (like ONDC) using only WhatsApp text, voice notes, and images. 
 
-Multimodal AI (Gemini 1.5 Flash) handles parsing, translation, and computer vision-based quality grading, while enterprise-grade ONIX Docker containers handle cryptographic network security and strictly validated peer-to-peer transaction routing.
+Multimodal AI handles parsing, translation, and computer vision-based quality grading, while enterprise-grade ONIX Docker containers handle cryptographic network security and strictly validated peer-to-peer transaction routing.
 
 ---
 
